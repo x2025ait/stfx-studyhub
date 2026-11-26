@@ -1,78 +1,1111 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Tend - Plant watering reminders</title>
-  <meta name="description" content="Keep your plants thriving with a simple, prioritized watering list.">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <header class="site-header">
-    <a class="brand" href="#top" aria-label="Tend home">tend<span>.</span></a>
-    <p class="header-note">A calmer way to care for your plants</p>
-    <p class="today-label" id="today-label"></p>
-  </header>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#003366">
+    <meta name="description" content="Crowdsourced exam topics and study readiness for St. Francis Xavier University.">
+    <title>StFX StudyHub — Study smarter, together</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #1e293b;
+        background: #f4f6f9;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        --navy: #003366;
+        --blue: #1e5aa8;
+        --ink: #1e293b;
+        --muted: #64748b;
+        --line: #e2e8f0;
+        --surface: #fff;
+        --wash: #f4f6f9;
+        --green: #16835d;
+        --shadow: 0 12px 32px rgb(15 39 69 / 7%);
+      }
 
-  <main id="top">
-    <section class="intro" aria-labelledby="page-title">
-      <div>
-        <p class="eyebrow">Your little indoor garden</p>
-        <h1 id="page-title">Good things grow with a little care.</h1>
-        <p class="intro-copy">Your watering list, sorted by who needs you most.</p>
-      </div>
-      <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=85" alt="Sunlit green houseplant leaves">
-    </section>
+      * { box-sizing: border-box; }
 
-    <section class="summary" aria-label="Watering summary">
-      <div class="summary-item"><span class="summary-value" id="plant-count">0</span><span class="summary-label">plants</span></div>
-      <div class="summary-item urgent-summary"><span class="summary-value" id="due-count">0</span><span class="summary-label">need water today</span></div>
-      <p id="summary-message" class="summary-message"></p>
-    </section>
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        background:
+          radial-gradient(ellipse at 82% 0%, rgb(30 90 168 / 7%), transparent 34rem),
+          var(--wash);
+      }
 
-    <div class="workspace">
-      <section class="queue" aria-labelledby="queue-title">
-        <div class="section-heading">
+      button, input, select, textarea { font: inherit; }
+      button { cursor: pointer; }
+      button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+        outline: 3px solid rgb(30 90 168 / 28%);
+        outline-offset: 2px;
+      }
+
+      .site-header {
+        color: #fff;
+        background: var(--navy);
+        box-shadow: 0 4px 16px rgb(0 29 62 / 14%);
+      }
+
+      .header-inner, main, .footer-inner {
+        width: min(1120px, calc(100% - 40px));
+        margin-inline: auto;
+      }
+
+      .header-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        min-height: 90px;
+        padding-block: 16px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 48px;
+        height: 48px;
+        flex: 0 0 auto;
+        place-items: center;
+        border: 1px solid rgb(255 255 255 / 27%);
+        border-radius: 14px;
+        background: rgb(255 255 255 / 10%);
+        font-size: 15px;
+        font-weight: 850;
+        letter-spacing: -0.07em;
+      }
+
+      .brand-name {
+        margin: 0;
+        font-size: 1.16rem;
+        font-weight: 760;
+        letter-spacing: -0.035em;
+      }
+
+      .tagline {
+        margin: 4px 0 0;
+        color: rgb(255 255 255 / 76%);
+        font-size: 0.79rem;
+        line-height: 1.45;
+      }
+
+      .beta-badge {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border: 1px solid rgb(255 255 255 / 19%);
+        border-radius: 999px;
+        background: rgb(255 255 255 / 8%);
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: 650;
+        white-space: nowrap;
+      }
+
+      .beta-badge::before {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #78e1b5;
+        box-shadow: 0 0 0 3px rgb(120 225 181 / 14%);
+        content: "";
+      }
+
+      main { padding-block: 34px 58px; }
+
+      .page-intro {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 22px;
+        margin-bottom: 24px;
+      }
+
+      .page-intro h1 {
+        margin: 0;
+        color: var(--navy);
+        font-size: clamp(1.7rem, 3.6vw, 2.45rem);
+        letter-spacing: -0.055em;
+        line-height: 1.13;
+      }
+
+      .page-intro p {
+        margin: 9px 0 0;
+        color: var(--muted);
+        font-size: 0.94rem;
+      }
+
+      .button {
+        display: inline-flex;
+        min-height: 42px;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 15px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        font-size: 0.87rem;
+        font-weight: 700;
+        transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+      }
+
+      .button:hover { transform: translateY(-1px); }
+      .button-primary { color: #fff; background: var(--blue); }
+      .button-primary:hover { background: #174b8e; }
+      .button-secondary { border-color: var(--line); color: var(--navy); background: #fff; }
+      .button-secondary:hover { border-color: #b6c6d9; background: #f8fafc; }
+      .button-icon { font-size: 1.14rem; line-height: 1; }
+
+      .panel {
+        border: 1px solid rgb(219 227 237 / 86%);
+        border-radius: 16px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .course-panel { padding: 22px; }
+
+      .course-controls {
+        display: grid;
+        grid-template-columns: minmax(210px, 0.9fr) minmax(260px, 1.5fr) minmax(180px, 0.8fr);
+        gap: 14px;
+        align-items: end;
+      }
+
+      .field-label {
+        display: block;
+        margin-bottom: 7px;
+        color: #475569;
+        font-size: 0.75rem;
+        font-weight: 750;
+        letter-spacing: 0.055em;
+        text-transform: uppercase;
+      }
+
+      .control {
+        width: 100%;
+        height: 44px;
+        padding: 0 12px;
+        border: 1px solid #d5deea;
+        border-radius: 9px;
+        color: var(--ink);
+        background: #fff;
+      }
+
+      .control::placeholder { color: #94a3b8; }
+
+      .search-wrap { position: relative; }
+
+      .search-wrap input { padding-left: 38px; }
+
+      .search-icon {
+        position: absolute;
+        top: 50%;
+        left: 13px;
+        color: #8190a4;
+        font-size: 1rem;
+        pointer-events: none;
+        transform: translateY(-50%);
+      }
+
+      .course-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        margin-top: 25px;
+        padding-top: 21px;
+        border-top: 1px solid #edf1f5;
+      }
+
+      .course-heading h2 {
+        margin: 0;
+        color: var(--navy);
+        font-size: clamp(1.22rem, 2.3vw, 1.6rem);
+        letter-spacing: -0.04em;
+      }
+
+      .course-heading p {
+        margin: 5px 0 0;
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+
+      .topic-count {
+        padding: 6px 10px;
+        border-radius: 999px;
+        color: #355a86;
+        background: #eef4fb;
+        font-size: 0.74rem;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .dashboard {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 205px;
+        gap: 22px;
+        align-items: center;
+        margin-top: 20px;
+        padding: 17px 18px;
+        border: 1px solid #e4ebf3;
+        border-radius: 12px;
+        background: linear-gradient(110deg, #f8fbff, #f5f8fc);
+      }
+
+      .readiness-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+
+      .readiness-title { color: var(--ink); font-size: 0.86rem; font-weight: 750; }
+      .readiness-number { color: var(--navy); font-size: 1.02rem; font-weight: 800; }
+
+      .progress-track {
+        height: 10px;
+        overflow: hidden;
+        border-radius: 99px;
+        background: #e0e8f1;
+      }
+
+      .progress-fill {
+        width: 0;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #1e5aa8, #33a27b);
+        transition: width 250ms ease;
+      }
+
+      .readiness-help {
+        margin: 8px 0 0;
+        color: #718096;
+        font-size: 0.75rem;
+      }
+
+      .contribution-stat {
+        padding-left: 19px;
+        border-left: 1px solid #dce5ef;
+      }
+
+      .contribution-number {
+        display: block;
+        color: var(--navy);
+        font-size: 1.4rem;
+        font-weight: 800;
+        letter-spacing: -0.045em;
+      }
+
+      .contribution-label {
+        display: block;
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 0.75rem;
+      }
+
+      .topics-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin: 29px 0 13px;
+      }
+
+      .topics-toolbar h2 {
+        margin: 0;
+        color: var(--navy);
+        font-size: 1.12rem;
+        letter-spacing: -0.025em;
+      }
+
+      .result-label { color: #758297; font-size: 0.78rem; }
+
+      .topic-list { display: grid; gap: 12px; }
+
+      .topic-card {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 20px;
+        padding: 18px 19px;
+        border: 1px solid #e1e7ef;
+        border-radius: 13px;
+        background: #fff;
+        box-shadow: 0 3px 12px rgb(15 39 69 / 3%);
+        transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+      }
+
+      .topic-card:hover {
+        border-color: #c9d6e5;
+        box-shadow: 0 8px 22px rgb(15 39 69 / 7%);
+        transform: translateY(-1px);
+      }
+
+      .topic-card h3 {
+        margin: 0;
+        color: #1c2d44;
+        font-size: 1rem;
+        font-weight: 750;
+        letter-spacing: -0.018em;
+        line-height: 1.4;
+      }
+
+      .topic-note {
+        margin: 7px 0 12px;
+        color: #64748b;
+        font-size: 0.86rem;
+        line-height: 1.58;
+      }
+
+      .topic-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 3px 9px;
+        border-radius: 999px;
+        font-size: 0.69rem;
+        font-weight: 730;
+        line-height: 1.25;
+      }
+
+      .tag-high { color: #98601a; background: #fff5df; }
+      .tag-core { color: #275b91; background: #eaf3ff; }
+      .tag-calc { color: #177054; background: #e7f7f0; }
+      .tag-custom { color: #6352a5; background: #f0edff; }
+
+      .topic-actions {
+        display: flex;
+        min-width: 130px;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .upvote-button {
+        display: inline-flex;
+        min-height: 34px;
+        align-items: center;
+        gap: 7px;
+        padding: 0 10px;
+        border: 1px solid #dce5ef;
+        border-radius: 9px;
+        color: #315777;
+        background: #fff;
+        font-size: 0.78rem;
+        font-weight: 700;
+        transition: background 140ms ease, border-color 140ms ease;
+      }
+
+      .upvote-button:hover { border-color: #aac3dc; background: #f2f7fc; }
+      .upvote-icon { font-size: 0.95rem; line-height: 1; }
+
+      .status-control {
+        display: grid;
+        gap: 5px;
+        justify-items: end;
+      }
+
+      .status-control label {
+        color: #8793a4;
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.045em;
+        text-transform: uppercase;
+      }
+
+      .status-select {
+        min-height: 34px;
+        max-width: 145px;
+        padding: 0 27px 0 9px;
+        border: 1px solid #dce5ef;
+        border-radius: 9px;
+        color: #475569;
+        background-color: #fff;
+        font-size: 0.75rem;
+        font-weight: 650;
+      }
+
+      .status-select[data-status="Reviewing"] { color: #98601a; background-color: #fffaf0; }
+      .status-select[data-status="Mastered"] { color: #177054; background-color: #effaf5; }
+
+      .empty-state {
+        padding: 38px 20px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 13px;
+        color: #64748b;
+        background: rgb(255 255 255 / 70%);
+        text-align: center;
+      }
+
+      .empty-state strong { display: block; margin-bottom: 5px; color: #334155; }
+
+      .why-section { margin-top: 48px; }
+
+      .why-heading { margin-bottom: 17px; text-align: center; }
+      .why-heading h2 {
+        margin: 0;
+        color: var(--navy);
+        font-size: 1.42rem;
+        letter-spacing: -0.04em;
+      }
+      .why-heading p { margin: 7px 0 0; color: var(--muted); font-size: 0.85rem; }
+
+      .why-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; }
+
+      .why-card {
+        padding: 18px;
+        border: 1px solid #e1e7ef;
+        border-radius: 13px;
+        background: #fff;
+      }
+
+      .why-icon {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        place-items: center;
+        border-radius: 10px;
+        color: var(--blue);
+        background: #edf4fc;
+        font-size: 1rem;
+      }
+
+      .why-card h3 { margin: 12px 0 6px; color: #23344b; font-size: 0.9rem; }
+      .why-card p { margin: 0; color: #6b7788; font-size: 0.79rem; line-height: 1.55; }
+
+      .site-footer {
+        padding: 21px 0;
+        border-top: 1px solid #e1e7ef;
+        color: #778397;
+        font-size: 0.75rem;
+        text-align: center;
+      }
+
+      .footer-inner { display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; }
+      .footer-inner strong { color: #506177; }
+
+      .modal-backdrop {
+        position: fixed;
+        z-index: 10;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        background: rgb(11 24 42 / 55%);
+        backdrop-filter: blur(3px);
+      }
+
+      .modal-backdrop[hidden] { display: none; }
+
+      .modal {
+        width: min(100%, 500px);
+        max-height: min(92vh, 720px);
+        overflow: auto;
+        padding: 24px;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 24px 70px rgb(0 0 0 / 20%);
+      }
+
+      .modal-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 19px;
+      }
+
+      .modal-header h2 { margin: 0; color: var(--navy); font-size: 1.35rem; letter-spacing: -0.04em; }
+      .modal-header p { margin: 6px 0 0; color: var(--muted); font-size: 0.83rem; line-height: 1.5; }
+
+      .close-button {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        flex: 0 0 auto;
+        place-items: center;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        color: #607087;
+        background: #fff;
+        font-size: 1.25rem;
+      }
+
+      .form-field { margin-top: 15px; }
+      .form-field textarea { height: 100px; padding: 11px 12px; resize: vertical; }
+      .form-hint { margin: 6px 0 0; color: #8793a4; font-size: 0.72rem; }
+
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 9px;
+        margin-top: 22px;
+      }
+
+      .toast {
+        position: fixed;
+        z-index: 20;
+        right: 20px;
+        bottom: 20px;
+        max-width: min(420px, calc(100% - 40px));
+        padding: 12px 16px;
+        border: 1px solid #cde9dc;
+        border-radius: 11px;
+        color: #14583e;
+        background: #f0fbf5;
+        box-shadow: 0 8px 28px rgb(15 39 69 / 14%);
+        font-size: 0.85rem;
+        font-weight: 650;
+      }
+
+      .toast[hidden] { display: none; }
+      .toast.error { border-color: #f2c9c9; color: #8d2929; background: #fff5f5; }
+
+      @media (max-width: 760px) {
+        .header-inner { align-items: flex-start; }
+        .beta-badge { margin-top: 4px; }
+        .course-controls { grid-template-columns: 1fr 1fr; }
+        .course-controls > :first-child { grid-column: 1 / -1; }
+        .why-grid { grid-template-columns: 1fr; }
+      }
+
+      @media (max-width: 540px) {
+        .header-inner, main, .footer-inner { width: min(100% - 28px, 1120px); }
+        .header-inner { min-height: auto; gap: 10px; padding-block: 14px; }
+        .brand { gap: 10px; }
+        .brand-mark { width: 40px; height: 40px; border-radius: 11px; font-size: 13px; }
+        .brand-name { font-size: 1rem; }
+        .tagline { max-width: 245px; font-size: 0.69rem; }
+        .beta-badge { padding: 7px 9px; font-size: 0.66rem; }
+        main { padding-top: 26px; }
+        .page-intro { align-items: flex-start; flex-direction: column; }
+        .page-intro .button { width: 100%; }
+        .course-panel { padding: 15px; }
+        .course-controls { grid-template-columns: 1fr; }
+        .course-controls > :first-child { grid-column: auto; }
+        .dashboard { grid-template-columns: 1fr; gap: 14px; }
+        .contribution-stat { padding: 12px 0 0; border-top: 1px solid #dce5ef; border-left: 0; }
+        .topic-card { grid-template-columns: 1fr; gap: 13px; padding: 16px; }
+        .topic-actions { min-width: 0; flex-direction: row; align-items: center; }
+        .status-control { justify-items: start; }
+        .topics-toolbar { align-items: baseline; }
+        .result-label { text-align: right; }
+        .modal { padding: 19px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="brand" aria-label="StFX StudyHub">
+          <div class="brand-mark" aria-hidden="true">StFX</div>
           <div>
-            <p class="eyebrow">Care queue</p>
-            <h2 id="queue-title">Your plants</h2>
+            <p class="brand-name">StFX StudyHub</p>
+            <p class="tagline">Crowdsourced Exam Topics &amp; Study Readiness for St. Francis Xavier University</p>
           </div>
-          <span class="sort-note">Most urgent first</span>
         </div>
-        <div class="plant-list" id="plant-list" aria-live="polite"></div>
-        <p class="empty" id="empty-message" hidden>Your plant shelf is empty. Add your first one to get started.</p>
+        <span class="beta-badge">Campus Beta &bull; Antigonish, NS</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-intro" aria-labelledby="welcome-heading">
+        <div>
+          <h1 id="welcome-heading">Your next exam, less overwhelming.</h1>
+          <p>Share what matters. See what you know. Study together.</p>
+        </div>
+        <button class="button button-primary" id="open-contribute" type="button">
+          <span class="button-icon" aria-hidden="true">+</span> Contribute a topic
+        </button>
       </section>
 
-      <aside class="add-panel" aria-labelledby="add-title">
-        <p class="eyebrow">Make room for one more</p>
-        <h2 id="add-title">Add a plant</h2>
-        <form id="plant-form">
-          <label for="plant-name">Plant name</label>
-          <input id="plant-name" name="name" type="text" placeholder="e.g. Monstera" maxlength="50" required>
-
-          <label for="plant-kind">Plant type <span class="optional">optional</span></label>
-          <input id="plant-kind" name="kind" type="text" placeholder="e.g. Tropical" maxlength="40">
-
-          <label for="watering-interval">Water every</label>
-          <div class="interval-input">
-            <input id="watering-interval" name="interval" type="number" min="1" max="90" value="7" required>
-            <span>days</span>
+      <section class="panel course-panel" aria-label="Course topics and study readiness">
+        <div class="course-controls">
+          <div>
+            <label class="field-label" for="course-select">Choose a course</label>
+            <select class="control" id="course-select"></select>
           </div>
+          <div>
+            <label class="field-label" for="topic-search">Search topics</label>
+            <div class="search-wrap">
+              <span class="search-icon" aria-hidden="true">⌕</span>
+              <input class="control" id="topic-search" type="search" placeholder="Try “regression” or “market”" autocomplete="off">
+            </div>
+          </div>
+          <div>
+            <label class="field-label" for="tag-filter">Filter by category</label>
+            <select class="control" id="tag-filter">
+              <option value="all">All categories</option>
+              <option value="High Yield">High Yield</option>
+              <option value="Core Concept">Core Concept</option>
+              <option value="Calculation / Case">Calculation / Case</option>
+              <option value="Student Added">Student Added</option>
+            </select>
+          </div>
+        </div>
 
-          <label for="last-watered">Last watered</label>
-          <input id="last-watered" name="lastWatered" type="date" required>
+        <div class="course-heading">
+          <div>
+            <h2 id="course-title"></h2>
+            <p id="course-description"></p>
+          </div>
+          <span class="topic-count" id="topic-count"></span>
+        </div>
 
-          <button class="button add-button" type="submit">Add to my plants <span aria-hidden="true">+</span></button>
+        <div class="dashboard" aria-label="Exam readiness dashboard">
+          <div>
+            <div class="readiness-head">
+              <span class="readiness-title">Your exam readiness</span>
+              <span class="readiness-number" id="readiness-number">0%</span>
+            </div>
+            <div class="progress-track" id="progress-track" role="progressbar" aria-label="Exam readiness" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <p class="readiness-help">Mastered topics count fully; topics you’re reviewing count halfway.</p>
+          </div>
+          <div class="contribution-stat">
+            <span class="contribution-number" id="contribution-count">0</span>
+            <span class="contribution-label">student contributions</span>
+          </div>
+        </div>
+
+        <div class="topics-toolbar">
+          <h2>Exam topics</h2>
+          <span class="result-label" id="result-count" aria-live="polite"></span>
+        </div>
+        <div class="topic-list" id="topic-list" aria-live="polite"></div>
+      </section>
+
+      <section class="why-section" aria-labelledby="why-heading">
+        <div class="why-heading">
+          <h2 id="why-heading">Why StFX StudyHub?</h2>
+          <p>A better way to prepare, built around how our campus learns.</p>
+        </div>
+        <div class="why-grid">
+          <article class="why-card">
+            <span class="why-icon" aria-hidden="true">✦</span>
+            <h3>Crowdsourced campus data</h3>
+            <p>Find the concepts your classmates are seeing in lectures, assignments, and past exams.</p>
+          </article>
+          <article class="why-card">
+            <span class="why-icon" aria-hidden="true">↗</span>
+            <h3>Local network effects</h3>
+            <p>Every useful topic and upvote makes the shared study guide more valuable for the next X-Ring.</p>
+          </article>
+          <article class="why-card">
+            <span class="why-icon" aria-hidden="true">✓</span>
+            <h3>Progress that’s yours</h3>
+            <p>Mark topics as you go and get a readiness snapshot that reflects your own study progress.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner"><strong>StFX StudyHub</strong><span>— An independent student study tool. Course topics are community-submitted.</span></div>
+    </footer>
+
+    <div class="modal-backdrop" id="contribute-modal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-description">
+        <div class="modal-header">
+          <div>
+            <h2 id="modal-title">Add an exam topic</h2>
+            <p id="modal-description">Help your classmates focus on what matters in this course.</p>
+          </div>
+          <button class="close-button" id="close-modal" type="button" aria-label="Close dialog">&times;</button>
+        </div>
+        <form id="contribute-form">
+          <div class="form-field">
+            <label class="field-label" for="new-topic-title">Topic name</label>
+            <input class="control" id="new-topic-title" name="title" maxlength="90" required placeholder="e.g. Break-even analysis">
+          </div>
+          <div class="form-field">
+            <label class="field-label" for="new-topic-note">Exam tip</label>
+            <textarea class="control" id="new-topic-note" name="note" maxlength="320" required placeholder="What should a classmate remember or practise?"></textarea>
+            <p class="form-hint">Keep it helpful, specific, and kind.</p>
+          </div>
+          <div class="form-field">
+            <label class="field-label" for="new-topic-category">Category tag</label>
+            <select class="control" id="new-topic-category" name="category" required>
+              <option value="High Yield">High Yield</option>
+              <option value="Core Concept">Core Concept</option>
+              <option value="Calculation / Case">Calculation / Case</option>
+            </select>
+          </div>
+          <div class="form-actions">
+            <button class="button button-secondary" id="cancel-modal" type="button">Cancel</button>
+            <button class="button button-primary" type="submit">Add topic</button>
+          </div>
         </form>
-      </aside>
-    </section>
-  </main>
+      </section>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-  <footer class="site-footer">
-    <p>Student prototype for BSAD 281 at St. Francis Xavier University. Not a real company — all data is fictional.</p>
-  </footer>
+    <script>
+      (() => {
+        "use strict";
 
-  <script src="data.js"></script>
-  <script src="app.js"></script>
-</body>
+        const courses = {
+          "BSAD 281": {
+            title: "BSAD 281 · Principles of Marketing",
+            description: "Core marketing frameworks, strategy, and applied cases.",
+            topics: [
+              { id: "bsad281-segmentation", title: "Segmentation, targeting & positioning (STP)", note: "Be ready to define a target segment and write a clear value proposition that differentiates the brand.", category: "High Yield", votes: 34 },
+              { id: "bsad281-four-ps", title: "The marketing mix: 4 Ps", note: "Connect product, price, place, and promotion decisions to one another instead of treating them as separate lists.", category: "Core Concept", votes: 28 },
+              { id: "bsad281-consumer", title: "Consumer decision-making process", note: "Know the stages from need recognition through post-purchase evaluation, and where marketers can influence each one.", category: "High Yield", votes: 25 },
+              { id: "bsad281-swot", title: "SWOT analysis & competitive advantage", note: "Separate internal strengths and weaknesses from external opportunities and threats; support each point with case evidence.", category: "Calculation / Case", votes: 19 },
+              { id: "bsad281-elasticity", title: "Price elasticity & pricing strategy", note: "Practise interpreting elasticity: inelastic demand gives more room to raise price, all else being equal.", category: "Calculation / Case", votes: 17 },
+              { id: "bsad281-brand", title: "Brand equity and brand positioning", note: "Review how awareness, associations, perceived quality, and loyalty build long-term brand equity.", category: "Core Concept", votes: 15 }
+            ]
+          },
+          "BSAD 221": {
+            title: "BSAD 221 · Financial Accounting",
+            description: "Financial statements, adjusting entries, and the accounting cycle.",
+            topics: [
+              { id: "bsad221-cycle", title: "The accounting cycle & adjusting entries", note: "Work through adjustments for accruals, deferrals, depreciation, and unearned revenue before preparing statements.", category: "High Yield", votes: 31 },
+              { id: "bsad221-statements", title: "Income statement and balance sheet connections", note: "Trace net income to retained earnings and check how each transaction affects the accounting equation.", category: "Core Concept", votes: 26 },
+              { id: "bsad221-inventory", title: "Inventory costing: FIFO and weighted average", note: "Practise the cost flow assumptions with changing prices and keep units sold separate from units remaining.", category: "Calculation / Case", votes: 22 },
+              { id: "bsad221-receivables", title: "Accounts receivable & bad debt estimation", note: "Know the allowance method and how an aging schedule estimates uncollectible accounts.", category: "Calculation / Case", votes: 18 },
+              { id: "bsad221-cashflow", title: "Statement of cash flows", note: "Classify activities as operating, investing, or financing; indirect-method adjustments are a common sticking point.", category: "High Yield", votes: 16 }
+            ]
+          },
+          "ECON 101": {
+            title: "ECON 101 · Introduction to Microeconomics",
+            description: "Markets, consumer choices, firm decisions, and policy.",
+            topics: [
+              { id: "econ101-supply-demand", title: "Supply, demand & market equilibrium", note: "Distinguish a movement along a curve from a shift, then predict the effect on equilibrium price and quantity.", category: "High Yield", votes: 38 },
+              { id: "econ101-elasticity", title: "Elasticity of demand and supply", note: "Use the percentage-change formula and interpret whether the result is elastic, inelastic, or unit elastic.", category: "Calculation / Case", votes: 29 },
+              { id: "econ101-surplus", title: "Consumer surplus, producer surplus & deadweight loss", note: "Identify the relevant areas on a supply-demand graph and explain what a tax or price control changes.", category: "Calculation / Case", votes: 24 },
+              { id: "econ101-costs", title: "Production costs: marginal, average, fixed, and variable", note: "Remember that marginal cost crosses AVC and ATC at their minimum points; practise reading cost curves.", category: "Core Concept", votes: 21 },
+              { id: "econ101-market", title: "Perfect competition vs. monopoly", note: "Compare output and price choices, and explain why monopoly can create a deadweight loss.", category: "High Yield", votes: 19 }
+            ]
+          },
+          "STAT 201": {
+            title: "STAT 201 · Introductory Statistics",
+            description: "Descriptive statistics, inference, and interpreting data.",
+            topics: [
+              { id: "stat201-ci", title: "Confidence intervals and margin of error", note: "Interpret the interval in context and remember that confidence describes the method, not the probability for this fixed interval.", category: "High Yield", votes: 33 },
+              { id: "stat201-tests", title: "Hypothesis tests, p-values & conclusions", note: "State H₀ and Hₐ, compare the p-value to α, then write a conclusion in the language of the question.", category: "Core Concept", votes: 30 },
+              { id: "stat201-regression", title: "Linear regression & correlation", note: "Interpret slope and R² in context; correlation describes association and does not establish causation.", category: "Calculation / Case", votes: 25 },
+              { id: "stat201-distributions", title: "Normal distribution and z-scores", note: "Standardize with z = (x − mean) / SD, then use the normal model to find proportions or cutoffs.", category: "Calculation / Case", votes: 23 },
+              { id: "stat201-sampling", title: "Sampling distributions & the central limit theorem", note: "Know how sample size affects the standard error and when the sampling distribution of the mean is approximately normal.", category: "High Yield", votes: 20 }
+            ]
+          }
+        };
+
+        const STORAGE_KEY = "stfx-studyhub-v1";
+        const statusOptions = ["Not Started", "Reviewing", "Mastered"];
+        const defaultState = { topics: {}, votes: {}, statuses: {} };
+        let state = loadState();
+        let activeCourse = "BSAD 281";
+        let toastTimer;
+        let lastFocusedElement;
+
+        const courseSelect = document.querySelector("#course-select");
+        const searchInput = document.querySelector("#topic-search");
+        const tagFilter = document.querySelector("#tag-filter");
+        const topicList = document.querySelector("#topic-list");
+        const modal = document.querySelector("#contribute-modal");
+        const form = document.querySelector("#contribute-form");
+        const toast = document.querySelector("#toast");
+
+        function loadState() {
+          try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return structuredClone(defaultState);
+            const saved = JSON.parse(raw);
+            if (!saved || typeof saved !== "object" || Array.isArray(saved)) {
+              throw new Error("Saved StudyHub data has an invalid format.");
+            }
+            return {
+              topics: saved.topics && typeof saved.topics === "object" ? saved.topics : {},
+              votes: saved.votes && typeof saved.votes === "object" ? saved.votes : {},
+              statuses: saved.statuses && typeof saved.statuses === "object" ? saved.statuses : {}
+            };
+          } catch (error) {
+            if (error instanceof SyntaxError) {
+              showToast("Saved StudyHub data could not be read. Your current browser data will be reset.", true);
+              try {
+                localStorage.removeItem(STORAGE_KEY);
+              } catch (storageError) {
+                console.error("Could not clear invalid StudyHub data:", storageError);
+              }
+              return structuredClone(defaultState);
+            }
+            if (error instanceof DOMException && error.name === "SecurityError") {
+              showToast("Browser storage is unavailable. Changes may not be saved.", true);
+              return structuredClone(defaultState);
+            }
+            console.error("Could not load StudyHub data:", error);
+            showToast("StudyHub data could not be loaded. Starting with a fresh view.", true);
+            return structuredClone(defaultState);
+          }
+        }
+
+        function saveState() {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            return true;
+          } catch (error) {
+            console.error("Could not save StudyHub data:", error);
+            showToast("Your browser couldn't save this change. Check that local storage is available.", true);
+            return false;
+          }
+        }
+
+        function showToast(message, isError = false) {
+          if (!toast) return;
+          window.clearTimeout(toastTimer);
+          toast.textContent = message;
+          toast.classList.toggle("error", isError);
+          toast.hidden = false;
+          toastTimer = window.setTimeout(() => { toast.hidden = true; }, 3600);
+        }
+
+        function getCourseTopics(courseId = activeCourse) {
+          const base = courses[courseId].topics;
+          const added = Array.isArray(state.topics[courseId]) ? state.topics[courseId] : [];
+          return [...base, ...added].map((topic) => ({
+            ...topic,
+            votes: Number.isFinite(state.votes[topic.id]) ? state.votes[topic.id] : topic.votes
+          }));
+        }
+
+        function getStatus(topicId) {
+          const savedStatus = state.statuses[activeCourse]?.[topicId];
+          return statusOptions.includes(savedStatus) ? savedStatus : "Not Started";
+        }
+
+        function categoryClass(category) {
+          if (category === "High Yield") return "tag-high";
+          if (category === "Calculation / Case") return "tag-calc";
+          if (category === "Core Concept") return "tag-core";
+          return "tag-custom";
+        }
+
+        function renderCourseOptions() {
+          courseSelect.innerHTML = "";
+          Object.keys(courses).forEach((courseId) => {
+            const option = document.createElement("option");
+            option.value = courseId;
+            option.textContent = `${courseId} — ${courses[courseId].title.split(" · ")[1]}`;
+            courseSelect.append(option);
+          });
+          courseSelect.value = activeCourse;
+        }
+
+        function renderDashboard(allTopics) {
+          const statuses = state.statuses[activeCourse] || {};
+          const score = allTopics.length
+            ? allTopics.reduce((total, topic) => {
+              const status = statuses[topic.id];
+              return total + (status === "Mastered" ? 1 : status === "Reviewing" ? 0.5 : 0);
+            }, 0) / allTopics.length
+            : 0;
+          const readiness = Math.round(score * 100);
+          const totalVotes = allTopics.reduce((total, topic) => total + topic.votes, 0);
+          const addedTopics = Array.isArray(state.topics[activeCourse]) ? state.topics[activeCourse].length : 0;
+          const contributions = totalVotes + addedTopics;
+
+          document.querySelector("#readiness-number").textContent = `${readiness}%`;
+          document.querySelector("#progress-fill").style.width = `${readiness}%`;
+          document.querySelector("#progress-track").setAttribute("aria-valuenow", String(readiness));
+          document.querySelector("#contribution-count").textContent = contributions.toLocaleString();
+          document.querySelector("#course-title").textContent = courses[activeCourse].title;
+          document.querySelector("#course-description").textContent = courses[activeCourse].description;
+          document.querySelector("#topic-count").textContent = `${allTopics.length} topics`;
+        }
+
+        function createTopicCard(topic) {
+          const card = document.createElement("article");
+          card.className = "topic-card";
+
+          const content = document.createElement("div");
+          const title = document.createElement("h3");
+          title.textContent = topic.title;
+          const note = document.createElement("p");
+          note.className = "topic-note";
+          note.textContent = topic.note;
+          const meta = document.createElement("div");
+          meta.className = "topic-meta";
+          const category = document.createElement("span");
+          category.className = `tag ${categoryClass(topic.category)}`;
+          category.textContent = topic.category;
+          meta.append(category);
+          content.append(title, note, meta);
+
+          const actions = document.createElement("div");
+          actions.className = "topic-actions";
+          const upvote = document.createElement("button");
+          upvote.className = "upvote-button";
+          upvote.type = "button";
+          upvote.setAttribute("aria-label", `Upvote ${topic.title}, currently ${topic.votes} upvotes`);
+          const arrow = document.createElement("span");
+          arrow.className = "upvote-icon";
+          arrow.setAttribute("aria-hidden", "true");
+          arrow.textContent = "↑";
+          const voteCount = document.createElement("span");
+          voteCount.textContent = String(topic.votes);
+          upvote.append(arrow, voteCount);
+          upvote.addEventListener("click", () => {
+            state.votes[topic.id] = topic.votes + 1;
+            saveState();
+            render();
+          });
+
+          const statusWrap = document.createElement("div");
+          statusWrap.className = "status-control";
+          const statusLabel = document.createElement("label");
+          const statusId = `status-${topic.id}`;
+          statusLabel.htmlFor = statusId;
+          statusLabel.textContent = "Your progress";
+          const status = document.createElement("select");
+          status.id = statusId;
+          status.className = "status-select";
+          status.setAttribute("aria-label", `Study status for ${topic.title}`);
+          statusOptions.forEach((value) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            status.append(option);
+          });
+          status.value = getStatus(topic.id);
+          status.dataset.status = status.value;
+          status.addEventListener("change", () => {
+            if (!state.statuses[activeCourse]) state.statuses[activeCourse] = {};
+            state.statuses[activeCourse][topic.id] = status.value;
+            saveState();
+            render();
+          });
+          statusWrap.append(statusLabel, status);
+          actions.append(upvote, statusWrap);
+          card.append(content, actions);
+          return card;
+        }
+
+        function renderTopics(allTopics) {
+          const query = searchInput.value.trim().toLocaleLowerCase();
+          const category = tagFilter.value;
+          const filtered = allTopics.filter((topic) => {
+            const matchesQuery = !query || `${topic.title} ${topic.note} ${topic.category}`.toLocaleLowerCase().includes(query);
+            const matchesCategory = category === "all" || topic.category === category;
+            return matchesQuery && matchesCategory;
+          });
+
+          topicList.replaceChildren();
+          document.querySelector("#result-count").textContent = `Showing ${filtered.length} of ${allTopics.length}`;
+          if (!filtered.length) {
+            const empty = document.createElement("div");
+            empty.className = "empty-state";
+            const title = document.createElement("strong");
+            title.textContent = "No matching topics";
+            const message = document.createElement("span");
+            message.textContent = "Try another search or category, or contribute the first topic.";
+            empty.append(title, message);
+            topicList.append(empty);
+            return;
+          }
+          filtered.forEach((topic) => topicList.append(createTopicCard(topic)));
+        }
+
+        function render() {
+          const topics = getCourseTopics();
+          renderDashboard(topics);
+          renderTopics(topics);
+        }
+
+        function openModal() {
+          lastFocusedElement = document.activeElement;
+          modal.hidden = false;
+          document.querySelector("#new-topic-title").focus();
+          document.body.style.overflow = "hidden";
+        }
+
+        function closeModal() {
+          modal.hidden = true;
+          document.body.style.overflow = "";
+          if (lastFocusedElement instanceof HTMLElement) lastFocusedElement.focus();
+        }
+
+        courseSelect.addEventListener("change", () => {
+          activeCourse = courseSelect.value;
+          render();
+        });
+        searchInput.addEventListener("input", render);
+        tagFilter.addEventListener("change", render);
+        document.querySelector("#open-contribute").addEventListener("click", openModal);
+        document.querySelector("#close-modal").addEventListener("click", closeModal);
+        document.querySelector("#cancel-modal").addEventListener("click", closeModal);
+
+        modal.addEventListener("click", (event) => {
+          if (event.target === modal) closeModal();
+        });
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape" && !modal.hidden) closeModal();
+        });
+
+        form.addEventListener("submit", (event) => {
+          event.preventDefault();
+          if (!form.reportValidity()) return;
+
+          const formData = new FormData(form);
+          const title = String(formData.get("title") || "").trim();
+          const note = String(formData.get("note") || "").trim();
+          const category = String(formData.get("category") || "");
+          if (!title || !note) return;
+
+          const topic = {
+            id: `student-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            title,
+            note,
+            category: ["High Yield", "Core Concept", "Calculation / Case"].includes(category) ? category : "Core Concept",
+            votes: 0
+          };
+          if (!Array.isArray(state.topics[activeCourse])) state.topics[activeCourse] = [];
+          state.topics[activeCourse].push(topic);
+          if (saveState()) {
+            searchInput.value = "";
+            tagFilter.value = "all";
+            render();
+            closeModal();
+            form.reset();
+            showToast("Topic added. Thanks for helping your classmates!");
+          }
+        });
+
+        renderCourseOptions();
+        render();
+      })();
+    </script>
+  </body>
 </html>
