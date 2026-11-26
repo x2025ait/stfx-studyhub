@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tend - Plant watering reminders</title>
+  <meta name="description" content="Keep your plants thriving with a simple, prioritized watering list.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Tend home">tend<span>.</span></a>
+    <p class="header-note">A calmer way to care for your plants</p>
+    <p class="today-label" id="today-label"></p>
+  </header>
+
+  <main id="top">
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Your little indoor garden</p>
+        <h1 id="page-title">Good things grow with a little care.</h1>
+        <p class="intro-copy">Your watering list, sorted by who needs you most.</p>
+      </div>
+      <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=85" alt="Sunlit green houseplant leaves">
+    </section>
+
+    <section class="summary" aria-label="Watering summary">
+      <div class="summary-item"><span class="summary-value" id="plant-count">0</span><span class="summary-label">plants</span></div>
+      <div class="summary-item urgent-summary"><span class="summary-value" id="due-count">0</span><span class="summary-label">need water today</span></div>
+      <p id="summary-message" class="summary-message"></p>
+    </section>
+
+    <div class="workspace">
+      <section class="queue" aria-labelledby="queue-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Care queue</p>
+            <h2 id="queue-title">Your plants</h2>
+          </div>
+          <span class="sort-note">Most urgent first</span>
+        </div>
+        <div class="plant-list" id="plant-list" aria-live="polite"></div>
+        <p class="empty" id="empty-message" hidden>Your plant shelf is empty. Add your first one to get started.</p>
+      </section>
+
+      <aside class="add-panel" aria-labelledby="add-title">
+        <p class="eyebrow">Make room for one more</p>
+        <h2 id="add-title">Add a plant</h2>
+        <form id="plant-form">
+          <label for="plant-name">Plant name</label>
+          <input id="plant-name" name="name" type="text" placeholder="e.g. Monstera" maxlength="50" required>
+
+          <label for="plant-kind">Plant type <span class="optional">optional</span></label>
+          <input id="plant-kind" name="kind" type="text" placeholder="e.g. Tropical" maxlength="40">
+
+          <label for="watering-interval">Water every</label>
+          <div class="interval-input">
+            <input id="watering-interval" name="interval" type="number" min="1" max="90" value="7" required>
+            <span>days</span>
+          </div>
+
+          <label for="last-watered">Last watered</label>
+          <input id="last-watered" name="lastWatered" type="date" required>
+
+          <button class="button add-button" type="submit">Add to my plants <span aria-hidden="true">+</span></button>
+        </form>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Student prototype for BSAD 281 at St. Francis Xavier University. Not a real company — all data is fictional.</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
