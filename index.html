@@ -1,78 +1,556 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Tend - Plant watering reminders</title>
-  <meta name="description" content="Keep your plants thriving with a simple, prioritized watering list.">
-  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#003366">
+  <meta name="description" content="Crowdsourced exam topics and study readiness for St. Francis Xavier University.">
+  <title>StFX StudyHub</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --navy: #003366;
+      --blue: #1E5AA8;
+      --paper: #FFFFFF;
+      --background: #F4F6F9;
+      --text: #1E293B;
+      --muted: #64748B;
+      --border: #E2E8F0;
+      --shadow: 0 8px 26px rgba(15, 35, 60, .06);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--background); color: var(--text); line-height: 1.5; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .site-header { padding: 25px 24px; background: var(--navy); color: white; }
+    .header-inner, main, .footer-inner { width: min(1120px, 100%); margin: 0 auto; }
+    .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-mark {
+      display: grid; place-items: center; width: 46px; height: 46px;
+      border: 1px solid rgba(255,255,255,.25); border-radius: 13px;
+      background: rgba(255,255,255,.12); font-size: 14px; font-weight: 800;
+    }
+    h1 { margin: 0; font-size: clamp(20px, 3vw, 25px); letter-spacing: -.5px; }
+    .tagline { margin: 3px 0 0; color: rgba(255,255,255,.78); font-size: 13px; }
+    .campus-badge {
+      flex: 0 0 auto; padding: 7px 11px; border: 1px solid rgba(255,255,255,.25);
+      border-radius: 999px; background: rgba(255,255,255,.1); font-size: 12px;
+    }
+
+    main { padding: 30px 24px 48px; }
+    .intro { margin-bottom: 20px; }
+    .eyebrow { margin: 0 0 7px; color: var(--blue); font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; }
+    .intro h2 { margin: 0; color: var(--navy); font-size: clamp(23px, 3vw, 30px); letter-spacing: -.8px; }
+    .intro-copy { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+
+    .course-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 2px 1px 12px; }
+    .course-tab {
+      flex: 0 0 auto; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px;
+      background: var(--paper); color: #475569; font-size: 13px; font-weight: 700;
+    }
+    .course-tab:hover { border-color: #9CB8DC; color: var(--navy); }
+    .course-tab[aria-selected="true"] { border-color: var(--navy); background: var(--navy); color: white; }
+
+    .readiness {
+      display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 26px;
+      margin: 5px 0 18px; padding: 21px 23px; border: 1px solid #DFE8F3;
+      border-radius: 14px; background: var(--paper); box-shadow: var(--shadow);
+    }
+    .readiness-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .readiness-heading h3 { margin: 0; font-size: 15px; }
+    .readiness-heading strong { color: var(--blue); font-size: 20px; }
+    .progress-track { height: 9px; overflow: hidden; border-radius: 999px; background: #E9EEF5; }
+    .progress-fill { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), #4385D1); transition: width .25s ease; }
+    .progress-note { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+    .contribution-stat { min-width: 132px; padding-left: 24px; border-left: 1px solid var(--border); }
+    .contribution-stat strong { display: block; color: var(--navy); font-size: 25px; line-height: 1.1; }
+    .contribution-stat span { color: var(--muted); font-size: 12px; }
+
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 20px 0 14px; }
+    .filters { display: flex; flex: 1; gap: 10px; }
+    .search-wrap { position: relative; flex: 1; }
+    .search-icon { position: absolute; top: 50%; left: 13px; color: #8290A3; transform: translateY(-50%); pointer-events: none; }
+    .search-input, .tag-select, .form-control {
+      min-height: 42px; border: 1px solid var(--border); border-radius: 9px; background: white; color: var(--text); outline: none;
+    }
+    .search-input { width: 100%; padding: 9px 12px 9px 38px; }
+    .tag-select { padding: 9px 32px 9px 12px; }
+    .search-input:focus, .tag-select:focus, .form-control:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(30,90,168,.12); }
+    .primary-button {
+      display: inline-flex; min-height: 42px; align-items: center; justify-content: center; gap: 7px;
+      padding: 9px 14px; border: 1px solid var(--blue); border-radius: 9px;
+      background: var(--blue); color: white; font-size: 13px; font-weight: 700;
+    }
+    .primary-button:hover { background: var(--navy); }
+
+    .topic-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .topic-card {
+      display: flex; min-height: 218px; flex-direction: column; padding: 18px;
+      border: 1px solid var(--border); border-radius: 12px; background: var(--paper);
+      box-shadow: 0 3px 12px rgba(15,35,60,.035); transition: border-color .15s, box-shadow .15s;
+    }
+    .topic-card:hover { border-color: #C4D4E8; box-shadow: var(--shadow); }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .topic-card h3 { margin: 0; color: #172B45; font-size: 16px; line-height: 1.35; }
+    .tag { flex: 0 0 auto; padding: 4px 8px; border-radius: 999px; background: #EDF4FF; color: #245C9E; font-size: 10px; font-weight: 800; white-space: nowrap; }
+    .tag.core { background: #EEF2F6; color: #526174; }
+    .tag.calculation { background: #FFF5E7; color: #A45B08; }
+    .exam-tip { margin: 12px 0 16px; color: #5B6878; font-size: 13px; }
+    .exam-tip strong { color: #334155; }
+    .card-bottom { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 13px; border-top: 1px solid #F0F2F5; }
+    .vote-button { display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border: 1px solid var(--border); border-radius: 8px; background: white; color: #536275; font-size: 12px; font-weight: 700; }
+    .vote-button:hover { border-color: #9BB9DF; background: #EDF4FF; color: var(--blue); }
+    .vote-icon { font-size: 15px; line-height: 1; }
+    .status-selector { display: flex; align-items: center; gap: 3px; padding: 3px; border-radius: 9px; background: #F2F4F7; }
+    .status-button { padding: 5px 7px; border: 0; border-radius: 7px; background: transparent; color: #64748B; font-size: 10px; font-weight: 700; }
+    .status-button:hover { background: white; color: var(--text); }
+    .status-button[aria-pressed="true"][data-status="reviewing"] { background: #FFF5E7; color: #A45B08; }
+    .status-button[aria-pressed="true"][data-status="mastered"] { background: #EAF7EF; color: #16834B; }
+    .status-button[aria-pressed="true"][data-status="not-started"] { background: white; color: #475569; }
+    .empty-state { grid-column: 1 / -1; padding: 38px 20px; border: 1px dashed #CBD5E1; border-radius: 12px; background: rgba(255,255,255,.65); color: var(--muted); text-align: center; }
+    .empty-state strong { display: block; margin-bottom: 4px; color: var(--text); }
+
+    .add-panel { display: none; margin-top: 18px; padding: 20px; border: 1px solid #D8E4F2; border-radius: 12px; background: white; box-shadow: var(--shadow); }
+    .add-panel.is-open { display: block; }
+    .form-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+    .form-heading h3 { margin: 0; color: var(--navy); font-size: 17px; }
+    .form-heading p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .close-button { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 8px; background: white; color: #64748B; font-size: 18px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+    .form-field { display: flex; flex-direction: column; gap: 6px; }
+    .form-field.full-width { grid-column: 1 / -1; }
+    .form-field label { color: #334155; font-size: 12px; font-weight: 700; }
+    .form-control { width: 100%; padding: 9px 11px; }
+    textarea.form-control { min-height: 76px; resize: vertical; }
+    .form-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
+    .form-message { margin: 0; color: #16834B; font-size: 12px; }
+    .storage-notice { display: none; margin: 0 0 14px; padding: 10px 12px; border: 1px solid #F0C5BF; border-radius: 8px; background: #FFF4F2; color: #8B2F24; font-size: 12px; }
+    .storage-notice.is-visible { display: block; }
+
+    .site-footer { padding: 35px 24px 30px; border-top: 1px solid var(--border); background: white; }
+    .footer-title { margin: 0 0 21px; color: var(--navy); font-size: 21px; letter-spacing: -.4px; }
+    .benefit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    .benefit { display: flex; gap: 12px; }
+    .benefit-icon { display: grid; flex: 0 0 36px; width: 36px; height: 36px; place-items: center; border-radius: 10px; background: #EDF4FF; color: var(--blue); font-size: 16px; }
+    .benefit h3 { margin: 0 0 4px; font-size: 13px; }
+    .benefit p { margin: 0; color: var(--muted); font-size: 12px; }
+    .footer-note { margin: 26px 0 0; padding-top: 17px; border-top: 1px solid #EDF0F4; color: #8793A2; font-size: 11px; text-align: center; }
+
+    @media (max-width: 720px) {
+      .header-inner { align-items: flex-start; flex-direction: column; gap: 14px; }
+      main { padding: 24px 16px 38px; }
+      .site-header, .site-footer { padding-right: 16px; padding-left: 16px; }
+      .readiness { grid-template-columns: 1fr; gap: 15px; }
+      .contribution-stat { display: flex; align-items: baseline; gap: 9px; padding: 12px 0 0; border-top: 1px solid var(--border); border-left: 0; }
+      .contribution-stat strong { font-size: 20px; }
+      .toolbar { align-items: stretch; flex-direction: column; }
+      .filters { flex-direction: column; }
+      .topic-grid { grid-template-columns: 1fr; }
+      .benefit-grid { grid-template-columns: 1fr; gap: 18px; }
+    }
+    @media (max-width: 430px) {
+      .card-bottom { align-items: flex-start; flex-direction: column; }
+      .status-selector { width: 100%; justify-content: space-between; }
+      .status-button { flex: 1; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-field.full-width { grid-column: auto; }
+      .form-actions { align-items: flex-start; flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="#top" aria-label="Tend home">tend<span>.</span></a>
-    <p class="header-note">A calmer way to care for your plants</p>
-    <p class="today-label" id="today-label"></p>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">StFX</div>
+        <div>
+          <h1>StFX StudyHub</h1>
+          <p class="tagline">Crowdsourced Exam Topics &amp; Study Readiness for St. Francis Xavier University</p>
+        </div>
+      </div>
+      <span class="campus-badge">Campus Beta &bull; Antigonish, NS</span>
+    </div>
   </header>
 
-  <main id="top">
+  <main>
     <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">Your campus study space</p>
+      <h2 id="page-title">Get exam-ready, together.</h2>
+      <p class="intro-copy">Explore what classmates are studying, track your progress, and share a helpful tip.</p>
+    </section>
+
+    <nav class="course-tabs" id="courseTabs" aria-label="Select a course" role="tablist"></nav>
+
+    <section class="readiness" aria-label="Course exam readiness">
       <div>
-        <p class="eyebrow">Your little indoor garden</p>
-        <h1 id="page-title">Good things grow with a little care.</h1>
-        <p class="intro-copy">Your watering list, sorted by who needs you most.</p>
-      </div>
-      <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=85" alt="Sunlit green houseplant leaves">
-    </section>
-
-    <section class="summary" aria-label="Watering summary">
-      <div class="summary-item"><span class="summary-value" id="plant-count">0</span><span class="summary-label">plants</span></div>
-      <div class="summary-item urgent-summary"><span class="summary-value" id="due-count">0</span><span class="summary-label">need water today</span></div>
-      <p id="summary-message" class="summary-message"></p>
-    </section>
-
-    <div class="workspace">
-      <section class="queue" aria-labelledby="queue-title">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Care queue</p>
-            <h2 id="queue-title">Your plants</h2>
-          </div>
-          <span class="sort-note">Most urgent first</span>
+        <div class="readiness-heading">
+          <h3 id="readinessTitle">Your exam readiness</h3>
+          <strong id="readinessPercent">0%</strong>
         </div>
-        <div class="plant-list" id="plant-list" aria-live="polite"></div>
-        <p class="empty" id="empty-message" hidden>Your plant shelf is empty. Add your first one to get started.</p>
-      </section>
+        <div class="progress-track" id="progressTrack" role="progressbar" aria-label="Exam readiness" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-note" id="progressNote"></p>
+      </div>
+      <div class="contribution-stat">
+        <strong id="contributionCount">0</strong>
+        <span>student contributions</span>
+      </div>
+    </section>
 
-      <aside class="add-panel" aria-labelledby="add-title">
-        <p class="eyebrow">Make room for one more</p>
-        <h2 id="add-title">Add a plant</h2>
-        <form id="plant-form">
-          <label for="plant-name">Plant name</label>
-          <input id="plant-name" name="name" type="text" placeholder="e.g. Monstera" maxlength="50" required>
+    <p class="storage-notice" id="storageNotice" role="alert">Your browser could not save changes. Check that local storage is enabled.</p>
 
-          <label for="plant-kind">Plant type <span class="optional">optional</span></label>
-          <input id="plant-kind" name="kind" type="text" placeholder="e.g. Tropical" maxlength="40">
+    <section aria-label="Exam topics">
+      <div class="toolbar">
+        <div class="filters">
+          <label class="search-wrap">
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <input class="search-input" id="searchInput" type="search" placeholder="Search topics or tips..." aria-label="Search topics or exam tips">
+          </label>
+          <select class="tag-select" id="tagFilter" aria-label="Filter by topic tag">
+            <option value="all">All tags</option>
+            <option value="High Yield">High Yield</option>
+            <option value="Core Concept">Core Concept</option>
+            <option value="Calculation / Case">Calculation / Case</option>
+          </select>
+        </div>
+        <button class="primary-button" id="toggleFormButton" type="button" aria-expanded="false" aria-controls="addTopicPanel"><span aria-hidden="true">＋</span> Contribute an Exam Topic</button>
+      </div>
+      <div class="topic-grid" id="topicGrid" aria-live="polite"></div>
 
-          <label for="watering-interval">Water every</label>
-          <div class="interval-input">
-            <input id="watering-interval" name="interval" type="number" min="1" max="90" value="7" required>
-            <span>days</span>
+      <section class="add-panel" id="addTopicPanel" aria-labelledby="formTitle">
+        <div class="form-heading">
+          <div>
+            <h3 id="formTitle">Share an exam topic</h3>
+            <p>Your contribution will be added to the selected course.</p>
           </div>
-
-          <label for="last-watered">Last watered</label>
-          <input id="last-watered" name="lastWatered" type="date" required>
-
-          <button class="button add-button" type="submit">Add to my plants <span aria-hidden="true">+</span></button>
+          <button class="close-button" id="closeFormButton" type="button" aria-label="Close form">&times;</button>
+        </div>
+        <form id="topicForm">
+          <div class="form-grid">
+            <div class="form-field full-width">
+              <label for="topicName">Topic name</label>
+              <input class="form-control" id="topicName" name="topicName" maxlength="90" required placeholder="e.g. Supply and demand shifts">
+            </div>
+            <div class="form-field full-width">
+              <label for="topicTip">Exam tip</label>
+              <textarea class="form-control" id="topicTip" name="topicTip" maxlength="240" required placeholder="Share a concise study tip or what to focus on..."></textarea>
+            </div>
+            <div class="form-field">
+              <label for="topicTag">Category tag</label>
+              <select class="form-control" id="topicTag" name="topicTag" required>
+                <option value="High Yield">High Yield</option>
+                <option value="Core Concept">Core Concept</option>
+                <option value="Calculation / Case">Calculation / Case</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <p class="form-message" id="formMessage" role="status"></p>
+            <button class="primary-button" type="submit">Add topic</button>
+          </div>
         </form>
-      </aside>
+      </section>
     </section>
   </main>
 
   <footer class="site-footer">
-    <p>Student prototype for BSAD 281 at St. Francis Xavier University. Not a real company — all data is fictional.</p>
+    <div class="footer-inner">
+      <h2 class="footer-title">Why StFX StudyHub?</h2>
+      <div class="benefit-grid">
+        <article class="benefit">
+          <div class="benefit-icon" aria-hidden="true">✦</div>
+          <div><h3>Crowdsourced Campus Data</h3><p>Share useful topics and exam tips shaped by StFX students.</p></div>
+        </article>
+        <article class="benefit">
+          <div class="benefit-icon" aria-hidden="true">↗</div>
+          <div><h3>Course-Level Network Effects</h3><p>Each contribution helps classmates focus on what matters in their courses.</p></div>
+        </article>
+        <article class="benefit">
+          <div class="benefit-icon" aria-hidden="true">✓</div>
+          <div><h3>Personal Readiness Tracking</h3><p>Track each topic at your own pace and watch your readiness grow.</p></div>
+        </article>
+      </div>
+      <p class="footer-note">Made for the StFX student community. StudyHub is a student resource, not an official source of exam materials.</p>
+    </div>
   </footer>
 
-  <script src="data.js"></script>
-  <script src="app.js"></script>
+  <script>
+    (() => {
+      "use strict";
+
+      const STORAGE_KEY = "stfx-studyhub-v1";
+      const seedCourses = [
+        {
+          id: "bsad-281", code: "BSAD 281", name: "Information Systems & Digital Business", contributions: 32,
+          topics: [
+            { id: "b281-1", name: "Systems Development Life Cycle (SDLC)", tip: "Know each SDLC stage and match a project scenario to the appropriate phase.", tag: "High Yield", votes: 24 },
+            { id: "b281-2", name: "Database Normalization & ER Diagrams", tip: "Identify entities, primary keys, and relationships; explain how normalization reduces redundancy.", tag: "Core Concept", votes: 19 },
+            { id: "b281-3", name: "Cybersecurity Threats & Controls", tip: "Connect each threat to a practical control and distinguish prevention from detection and recovery.", tag: "High Yield", votes: 17 },
+            { id: "b281-4", name: "Business Process Modeling", tip: "Review process-flow notation and look for bottlenecks, duplicated steps, and automation opportunities.", tag: "Calculation / Case", votes: 12 },
+            { id: "b281-5", name: "Cloud Computing & Digital Transformation", tip: "Compare cloud service models and weigh cost, scalability, control, and security in a business case.", tag: "Core Concept", votes: 10 }
+          ]
+        },
+        {
+          id: "bsad-221", code: "BSAD 221", name: "Introductory Financial Accounting", contributions: 41,
+          topics: [
+            { id: "b221-1", name: "The Accounting Cycle & Adjusting Entries", tip: "Practice moving from the unadjusted trial balance through adjustments and into the financial statements.", tag: "High Yield", votes: 29 },
+            { id: "b221-2", name: "Merchandising: Inventory & Cost of Goods Sold", tip: "Be clear on the inventory system used and how purchases, returns, and freight affect COGS.", tag: "Calculation / Case", votes: 23 },
+            { id: "b221-3", name: "Bank Reconciliation", tip: "Separate bank-side from book-side adjustments and remember which items need a journal entry.", tag: "Calculation / Case", votes: 18 },
+            { id: "b221-4", name: "Depreciation Methods & Asset Disposal", tip: "Work through straight-line and units-of-production calculations, then account for a disposal.", tag: "Core Concept", votes: 15 },
+            { id: "b221-5", name: "Accruals, Deferrals & Revenue Recognition", tip: "For each scenario, identify when cash moves versus when revenue is earned or an expense is incurred.", tag: "High Yield", votes: 13 }
+          ]
+        },
+        {
+          id: "econ-101", code: "ECON 101", name: "Introductory Microeconomics", contributions: 36,
+          topics: [
+            { id: "e101-1", name: "Supply, Demand & Market Equilibrium", tip: "Draw the axes, identify which curve shifts, and show the resulting price and quantity changes.", tag: "High Yield", votes: 26 },
+            { id: "e101-2", name: "Elasticity of Demand", tip: "Know the midpoint formula and how elasticity relates to total revenue after a price change.", tag: "Calculation / Case", votes: 21 },
+            { id: "e101-3", name: "Consumer & Producer Surplus", tip: "Practice locating surplus areas on a graph and explain how a price control changes them.", tag: "Core Concept", votes: 16 },
+            { id: "e101-4", name: "Costs of Production & Market Structures", tip: "Compare short-run and long-run costs and use each market structure's features in examples.", tag: "High Yield", votes: 14 },
+            { id: "e101-5", name: "Externalities & Public Goods", tip: "Distinguish private from social costs or benefits and identify an appropriate policy response.", tag: "Core Concept", votes: 11 }
+          ]
+        },
+        {
+          id: "stat-201", code: "STAT 201", name: "Elementary Statistics", contributions: 29,
+          topics: [
+            { id: "s201-1", name: "Descriptive Statistics & Data Visualization", tip: "Choose an appropriate measure of centre and spread; check for outliers or skew before interpreting.", tag: "Core Concept", votes: 20 },
+            { id: "s201-2", name: "Probability Rules & Distributions", tip: "Identify the distribution and its assumptions before selecting a formula or calculating a probability.", tag: "Calculation / Case", votes: 18 },
+            { id: "s201-3", name: "Sampling Distributions & the Central Limit Theorem", tip: "Keep the population, sample, and sampling distributions distinct in your explanation.", tag: "High Yield", votes: 16 },
+            { id: "s201-4", name: "Confidence Intervals", tip: "Interpret the interval in context and check the conditions before using a critical value.", tag: "Calculation / Case", votes: 14 },
+            { id: "s201-5", name: "Hypothesis Testing & p-values", tip: "Write hypotheses clearly, compare the p-value with alpha, and conclude in context.", tag: "High Yield", votes: 12 }
+          ]
+        }
+      ];
+      const allowedStatuses = new Set(["not-started", "reviewing", "mastered"]);
+      const allowedTags = new Set(["High Yield", "Core Concept", "Calculation / Case"]);
+      const elements = {
+        tabs: document.getElementById("courseTabs"),
+        grid: document.getElementById("topicGrid"),
+        search: document.getElementById("searchInput"),
+        tag: document.getElementById("tagFilter"),
+        readinessTitle: document.getElementById("readinessTitle"),
+        readinessPercent: document.getElementById("readinessPercent"),
+        progressFill: document.getElementById("progressFill"),
+        progressTrack: document.getElementById("progressTrack"),
+        progressNote: document.getElementById("progressNote"),
+        contributions: document.getElementById("contributionCount"),
+        notice: document.getElementById("storageNotice"),
+        panel: document.getElementById("addTopicPanel"),
+        toggleForm: document.getElementById("toggleFormButton"),
+        form: document.getElementById("topicForm"),
+        formMessage: document.getElementById("formMessage")
+      };
+
+      function createInitialState() {
+        return {
+          activeCourseId: seedCourses[0].id,
+          courses: seedCourses.map(course => ({
+            ...course,
+            topics: course.topics.map(topic => ({ ...topic, status: "not-started" }))
+          }))
+        };
+      }
+
+      function loadState() {
+        const fresh = createInitialState();
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+          if (!saved || !Array.isArray(saved.courses)) return fresh;
+          const savedCourses = new Map(saved.courses.filter(course => course && typeof course.id === "string").map(course => [course.id, course]));
+
+          fresh.courses = fresh.courses.map(course => {
+            const previous = savedCourses.get(course.id);
+            if (!previous) return course;
+            const savedTopics = Array.isArray(previous.topics) ? previous.topics : [];
+            const byId = new Map(savedTopics.filter(topic => topic && typeof topic.id === "string").map(topic => [topic.id, topic]));
+            const seedIds = new Set(course.topics.map(topic => topic.id));
+            const topics = course.topics.map(topic => {
+              const old = byId.get(topic.id);
+              return old ? {
+                ...topic,
+                votes: Number.isInteger(old.votes) && old.votes >= 0 ? old.votes : topic.votes,
+                status: allowedStatuses.has(old.status) ? old.status : "not-started"
+              } : topic;
+            });
+            for (const old of savedTopics) {
+              if (!old || typeof old.id !== "string" || seedIds.has(old.id) ||
+                  typeof old.name !== "string" || typeof old.tip !== "string" || !allowedTags.has(old.tag)) continue;
+              topics.push({
+                id: old.id,
+                name: old.name.slice(0, 90),
+                tip: old.tip.slice(0, 240),
+                tag: old.tag,
+                votes: Number.isInteger(old.votes) && old.votes >= 0 ? old.votes : 0,
+                status: allowedStatuses.has(old.status) ? old.status : "not-started"
+              });
+            }
+            return {
+              ...course,
+              contributions: Number.isInteger(previous.contributions) && previous.contributions >= course.contributions
+                ? previous.contributions : course.contributions,
+              topics
+            };
+          });
+          if (fresh.courses.some(course => course.id === saved.activeCourseId)) fresh.activeCourseId = saved.activeCourseId;
+        } catch (error) {
+          elements.notice.classList.add("is-visible");
+        }
+        return fresh;
+      }
+
+      const state = loadState();
+      let activeCourseId = state.activeCourseId;
+      const currentCourse = () => state.courses.find(course => course.id === activeCourseId) || state.courses[0];
+      const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[char]);
+      const classForTag = tag => tag === "Core Concept" ? "core" : tag === "Calculation / Case" ? "calculation" : "";
+
+      function saveState() {
+        try {
+          state.activeCourseId = activeCourseId;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          elements.notice.classList.remove("is-visible");
+        } catch (error) {
+          elements.notice.classList.add("is-visible");
+        }
+      }
+
+      function renderTabs() {
+        elements.tabs.innerHTML = state.courses.map(course => `
+          <button class="course-tab" type="button" role="tab" id="tab-${escapeHtml(course.id)}"
+            aria-selected="${course.id === activeCourseId}" aria-controls="topicGrid" data-course-id="${escapeHtml(course.id)}">
+            ${escapeHtml(course.code)} <span aria-hidden="true">·</span> ${escapeHtml(course.name)}
+          </button>
+        `).join("");
+      }
+
+      function renderDashboard(course) {
+        const total = course.topics.length;
+        const mastered = course.topics.filter(topic => topic.status === "mastered").length;
+        const reviewing = course.topics.filter(topic => topic.status === "reviewing").length;
+        const score = total ? Math.round((mastered + reviewing * 0.5) / total * 100) : 0;
+        elements.readinessTitle.textContent = `${course.code} exam readiness`;
+        elements.readinessPercent.textContent = `${score}%`;
+        elements.progressFill.style.width = `${score}%`;
+        elements.progressTrack.setAttribute("aria-valuenow", String(score));
+        elements.progressNote.textContent = `${mastered} mastered · ${reviewing} in review · ${total} topics`;
+        elements.contributions.textContent = String(course.contributions);
+      }
+
+      function renderTopics() {
+        const query = elements.search.value.trim().toLowerCase();
+        const selectedTag = elements.tag.value;
+        const topics = currentCourse().topics.filter(topic =>
+          (!query || `${topic.name} ${topic.tip} ${topic.tag}`.toLowerCase().includes(query)) &&
+          (selectedTag === "all" || topic.tag === selectedTag)
+        );
+
+        if (!topics.length) {
+          elements.grid.innerHTML = `<div class="empty-state"><strong>No topics found</strong>Try a different search or tag filter, or contribute a new exam topic.</div>`;
+          return;
+        }
+
+        elements.grid.innerHTML = topics.map(topic => `
+          <article class="topic-card">
+            <div class="card-top">
+              <h3>${escapeHtml(topic.name)}</h3>
+              <span class="tag ${classForTag(topic.tag)}">${escapeHtml(topic.tag)}</span>
+            </div>
+            <p class="exam-tip"><strong>Exam tip:</strong> ${escapeHtml(topic.tip)}</p>
+            <div class="card-bottom">
+              <button class="vote-button" type="button" data-action="vote" data-topic-id="${escapeHtml(topic.id)}"
+                aria-label="Upvote ${escapeHtml(topic.name)}. ${topic.votes} upvotes">
+                <span class="vote-icon" aria-hidden="true">↑</span><span>${topic.votes}</span>
+              </button>
+              <div class="status-selector" role="group" aria-label="Study status for ${escapeHtml(topic.name)}">
+                ${[["not-started", "Not Started"], ["reviewing", "Reviewing"], ["mastered", "Mastered"]].map(([status, label]) => `
+                  <button class="status-button" type="button" data-action="status" data-status="${status}"
+                    data-topic-id="${escapeHtml(topic.id)}" aria-pressed="${topic.status === status}">${label}</button>
+                `).join("")}
+              </div>
+            </div>
+          </article>
+        `).join("");
+      }
+
+      function render() {
+        renderTabs();
+        renderDashboard(currentCourse());
+        renderTopics();
+        elements.toggleForm.setAttribute("aria-expanded", String(elements.panel.classList.contains("is-open")));
+      }
+
+      elements.tabs.addEventListener("click", event => {
+        const button = event.target.closest("[data-course-id]");
+        if (!button) return;
+        activeCourseId = button.dataset.courseId;
+        elements.formMessage.textContent = "";
+        saveState();
+        render();
+      });
+
+      elements.grid.addEventListener("click", event => {
+        const button = event.target.closest("button[data-action]");
+        if (!button) return;
+        const topic = currentCourse().topics.find(item => item.id === button.dataset.topicId);
+        if (!topic) return;
+        if (button.dataset.action === "vote") topic.votes += 1;
+        if (button.dataset.action === "status" && allowedStatuses.has(button.dataset.status)) topic.status = button.dataset.status;
+        saveState();
+        render();
+      });
+
+      elements.search.addEventListener("input", renderTopics);
+      elements.tag.addEventListener("change", renderTopics);
+      elements.toggleForm.addEventListener("click", () => {
+        const open = !elements.panel.classList.contains("is-open");
+        elements.panel.classList.toggle("is-open", open);
+        elements.toggleForm.setAttribute("aria-expanded", String(open));
+        if (open) document.getElementById("topicName").focus();
+      });
+      document.getElementById("closeFormButton").addEventListener("click", () => {
+        elements.panel.classList.remove("is-open");
+        elements.toggleForm.setAttribute("aria-expanded", "false");
+      });
+
+      elements.form.addEventListener("submit", event => {
+        event.preventDefault();
+        const data = new FormData(elements.form);
+        const name = String(data.get("topicName") || "").trim();
+        const tip = String(data.get("topicTip") || "").trim();
+        const tag = String(data.get("topicTag") || "");
+        if (!name || !tip || !allowedTags.has(tag)) return;
+
+        currentCourse().topics.push({
+          id: `student-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          name: name.slice(0, 90),
+          tip: tip.slice(0, 240),
+          tag,
+          votes: 0,
+          status: "not-started"
+        });
+        currentCourse().contributions += 1;
+        saveState();
+        elements.form.reset();
+        document.getElementById("topicTag").value = "High Yield";
+        elements.formMessage.textContent = "Topic added to this course.";
+        elements.search.value = "";
+        elements.tag.value = "all";
+        render();
+        document.getElementById("topicName").focus();
+      });
+
+      render();
+    })();
+  </script>
 </body>
 </html>
